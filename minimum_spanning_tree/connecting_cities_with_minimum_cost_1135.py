@@ -1,6 +1,26 @@
 import heapq
 
+class UnionFind(object):
+
+    def __init__(self, cities):
+        self.parent = {}
+        for city in range(1, cities+1):
+            self.parent[city] = city
+
+    def find(self, city):
+        if self.parent[city] != city:
+            self.parent[city] = self.find(self.parent[city])
+        return self.parent[city]
+
+    def union(self, city1, city2):
+        root1, root2 = self.find(city1, city2)
+        if root1 == root2:
+            return False
+        self.parent[root2] = root1
+        return False
+
 class Solution(object):
+
     def minimumCost(self, n, connections):
         """
         :type n: int
@@ -9,9 +29,20 @@ class Solution(object):
         """
         if n <= 0 or len(connections) == 0:
             return -1
-        return self.minimum_spanning_tree(n, connections)
+        return self.minimum_spanning_tree_prim(n, connections)
 
-    def minimum_spanning_tree(self, n, connections):
+    def minimum_spanning_tree_kruskal(self, n, connections):
+        unionfind = UnionFind(n)
+        connections.sort(key=lambda x: x[2])
+        total_cost = 0
+        for city1, city2, cost in connections:
+            if unionfind.union(city1, city2):
+                total_cost += cost
+        root = unionfind.find(n)
+        return total_cost if all(root == unionfind.find(city) for city in range(1, n+1)) else -1
+
+
+    def minimum_spanning_tree_prim(self, n, connections):
         visited = set()
         # pick any vertex and start exploring
         starting_vertex = connections[0][0]
